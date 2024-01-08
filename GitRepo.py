@@ -67,19 +67,14 @@ def repo_find(path=".", required=True):
     if os.path.isdir(os.path.join(path, ".git")):
         return GitRepository(path)
 
-    # If we haven't returned, recurse in parent, if w
     parent = os.path.realpath(os.path.join(path, ".."))
 
     if parent == path:
-        # Bottom case
-        # os.path.join("/", "..") == "/":
-        # If parent==path, then path is root.
         if required:
             raise Exception("No git directory.")
         else:
             return None
 
-    # Recursive case
     return repo_find(parent, required)
 
 class GitRepository (object):
@@ -94,7 +89,6 @@ class GitRepository (object):
         if not (force or os.path.isdir(self.gitdir)):
             raise Exception("Not a Git repository %s" % path)
 
-        # Read configuration file in .git/config
         self.config = configparser.ConfigParser()
         cf = repo_file(self, "config")
 

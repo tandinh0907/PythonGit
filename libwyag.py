@@ -10,7 +10,7 @@ import os
 import re
 import sys
 import zlib
-import GitRepo
+import gitRepo
 
 argparser = argparse.ArgumentParser(description="The content tracker")
 argsubparsers = argparser.add_subparsers(title="Commands", dest="command")
@@ -41,5 +41,4 @@ def main(argv=sys.argv[1:]):
     elif args.command == "tag"         : cmd_tag(tag)
             
 def cmd_init(args):
-    GitRepo.repo_create(args.path)
-
+    gitRepo.repo_create(args.path)
