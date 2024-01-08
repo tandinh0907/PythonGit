@@ -2,7 +2,7 @@ import argparse
 import collections
 import configparser
 from datetime import datetime
-import grp, pwd
+#import grp, pwd
 from fnmatch import fnmatch
 import hashlib
 from math import ceil
@@ -11,20 +11,12 @@ import re
 import sys
 import zlib
 import gitRepo
-
-argparser = argparse.ArgumentParser(description="The content tracker")
-argsubparsers = argparser.add_subparsers(title="Commands", dest="command")
-argsubparsers.required = True
-argsp = argsubparsers.add_parser("init", help="Initialize a new, empty repository.")
-argsp.add_argument("path",
-                   metavar="directory",
-                   nargs="?",
-                   default=".",
-                   help="Where to create the repository.")
+import gitCommand
+import Comparser
 
 
 def main(argv=sys.argv[1:]):
-    args = argparser.parse_args(argv)
+    args = Comparser.argparser.parse_args(argv)
     if   args.command == "add"         : cmd_add(args)
     elif args.command == "cat-file"    : cmd_cat_file(args)
     elif args.command == "checkout"    : cmd_checkout(args)
@@ -42,3 +34,24 @@ def main(argv=sys.argv[1:]):
             
 def cmd_init(args):
     gitRepo.repo_create(args.path)
+
+def cmd_cat_file(args):
+    repo = gitRepo.repo_find()
+    gitCommand.cat_file(repo, args.object, fmt=args.type.encode())
+
+def cmd_hash_object(args):
+    if args.write:
+        repo = gitRepo.repo_find()
+    else:
+        repo = None
+
+    with open(args.path, "rb") as fd:
+        sha = gitCommand.object_hash(fd, args.type.encode(), repo)
+        print(sha)
+
+def cmd_log(args):
+    repo = gitRepo.repo_find()
+    print("digraph wyaglog{")
+    print("  node[shape=rect]")
+    gitCommand.log_graphviz(repo, gitCommand.object_find(repo, args.commit), set())
+    print("}")

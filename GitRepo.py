@@ -98,6 +98,6 @@ class GitRepository (object):
             raise Exception("Configuration file missing")
 
         if not force:
-            vers = int(self.conf.get("core", "repositoryformatversion"))
+            vers = int(self.config.get("core", "repositoryformatversion"))
             if vers != 0:
                 raise Exception("Unsupported repositoryformatversion %s" % vers)
