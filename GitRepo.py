@@ -1,6 +1,16 @@
 import configparser
 import os
 
+"""
+A git repository is made of two things: a “work tree”, where the files meant to be in version control live,
+and a “git directory”, where Git stores its own data. In most cases, the worktree is a regular directory
+and the git directory is a child directory of the worktree, called .git.
+
+For simplification and education purpose, we'll stick the basic approach of worktree/.git. 
+Our repository object will then just hold two paths: the worktree and the gitdir.
+
+"""
+
 def repo_path(repo, *path):
     return os.path.join(repo.gitdir, *path)
 

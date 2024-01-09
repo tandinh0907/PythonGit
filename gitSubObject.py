@@ -1,4 +1,4 @@
-import gitCommand
+import gitUtil
 
 class GitObject (object):
 
@@ -33,25 +33,28 @@ class GitCommit(GitObject):
         self.kvlm = dict()
 
     def deserialize(self, data):
-        self.kvlm = gitCommand.kvlm_parse(data)
+        self.kvlm = gitUtil.kvlm_parse(data)
 
     def serialize(self):
-        return gitCommand.kvlm_serialize(self.kvlm)
+        return gitUtil.kvlm_serialize(self.kvlm)
     
 class GitTreeLeaf (object):
-    def __init__(self, mode, path, obj):
+    def __init__(self, mode, path, sha):
         self.mode = mode
         self.path = path
-        self.obj = obj
+        self.sha = sha
 
 class GitTree(GitObject):
     fmt=b'tree'
 
     def deserialize(self, data):
-        self.items = gitCommand.tree_parse(data)
+        self.items = gitUtil.tree_parse(data)
 
     def serialize(self):
-        return gitCommand.tree_serialize(self)
+        return gitUtil.tree_serialize(self)
 
     def init(self):
         self.items = list()
+
+class GitTag(GitCommit):
+    fmt = b'tag'

@@ -51,3 +51,67 @@ argsp.add_argument("commit",
                    default="HEAD",
                    nargs="?",
                    help="Commit to start at.")
+
+#For ls-tree command
+
+argsp = argsubparsers.add_parser("ls-tree", help="Pretty-print a tree object.")
+argsp.add_argument("-r",
+                   dest="recursive",
+                   action="store_true",
+                   help="Recurse into sub-trees")
+
+argsp.add_argument("tree",
+                   help="A tree-ish object.")
+
+#For the git checkout command
+argsp = argsubparsers.add_parser("checkout", help="Checkout a commit inside of a directory.")
+
+argsp.add_argument("commit",
+                   help="The commit or tree to checkout.")
+
+argsp.add_argument("path",
+                   help="The EMPTY directory to checkout on.")
+
+#For the show-ref command
+argsp = argsubparsers.add_parser("show-ref", help="List references.")
+
+#For the tag command: 
+#git tag                   List all tags
+#git tag NAME [OBJECT]     create a new *lightweight* tag NAME, pointing
+#                          at HEAD (default) or OBJECT
+#git tag -a NAME [OBJECT]  create a new tag *object* NAME, pointing at
+#                          HEAD (default) or OBJECT
+argsp = argsubparsers.add_parser(
+    "tag",
+    help="List and create tags")
+
+argsp.add_argument("-a",
+                   action="store_true",
+                   dest="create_tag_object",
+                   help="Whether to create a tag object")
+
+argsp.add_argument("name",
+                   nargs="?",
+                   help="The new tag's name")
+
+argsp.add_argument("object",
+                   default="HEAD",
+                   nargs="?",
+                   help="The object the new tag will point to")
+
+#For the clone of git rev-parse
+#For the purpose of further testing the “follow” feature of object_find, 
+#we’ll add an optional wyag-type argument to its interface.
+argsp = argsubparsers.add_parser(
+    "rev-parse",
+    help="Parse revision (or other objects) identifiers")
+
+argsp.add_argument("--wyag-type",
+                   metavar="type",
+                   dest="type",
+                   choices=["blob", "commit", "tag", "tree"],
+                   default=None,
+                   help="Specify the expected type")
+
+argsp.add_argument("name",
+                   help="The name to parse")
