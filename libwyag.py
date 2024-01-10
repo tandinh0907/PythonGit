@@ -17,20 +17,22 @@ import comParser
 
 def main(argv=sys.argv[1:]):
     args = comParser.argparser.parse_args(argv)
-    if   args.command == "add"         : cmd_add(args)
-    elif args.command == "cat-file"    : cmd_cat_file(args)
-    elif args.command == "checkout"    : cmd_checkout(args)
-    elif args.command == "commit"      : cmd_commit(args)
-    elif args.command == "hash-object" : cmd_hash_object(args)
-    elif args.command == "init"        : cmd_init(args)
-    elif args.command == "log"         : cmd_log(args)
-    elif args.command == "ls-tree"     : cmd_ls_tree(args)
-    elif args.command == "merge"       : cmd_merge(args)
-    elif args.command == "rebase"      : cmd_rebase(args)
-    elif args.command == "rev-parse"   : cmd_rev_parse(args)
-    elif args.command == "rm"          : cmd_rm(args)
-    elif args.command == "show-ref"    : cmd_show-ref(args)
-    elif args.command == "tag"         : cmd_tag(tag)
+    if   args.command == "add"          : cmd_add(args)
+    elif args.command == "cat-file"     : cmd_cat_file(args)
+    elif args.command == "check-ignore" : cmd_check_ignore(args)
+    elif args.command == "checkout"     : cmd_checkout(args)
+    elif args.command == "commit"       : cmd_commit(args)
+    elif args.command == "hash-object"  : cmd_hash_object(args)
+    elif args.command == "init"         : cmd_init(args)
+    elif args.command == "log"          : cmd_log(args)
+    elif args.command == "ls-files"     : cmd_ls_files(args)
+    elif args.command == "ls-tree"      : cmd_ls_tree(args)
+    elif args.command == "rev-parse"    : cmd_rev_parse(args)
+    elif args.command == "rm"           : cmd_rm(args)
+    elif args.command == "show-ref"     : cmd_show_ref(args)
+    elif args.command == "status"       : cmd_status(args)
+    elif args.command == "tag"          : cmd_tag(args)
+    else                                : print("Bad command.")
             
 def cmd_init(args):
     gitRepo.repo_create(args.path)
@@ -66,8 +68,8 @@ def cmd_ls_tree(args):
         #_It will take two arguments: a commit, and a directory. Git checkout only needs a commit.
         #_It will then instantiate the tree in the directory, if and only if the directory is empty.
         # Git is full of safeguards to avoid deleting data, which would be too complicated and unsafe 
-        # to try to reproduce in this simplified version. Since the point of this simplified version is to learn and demonstrate git,
-        # not to produce a working implementation, this limitation is acceptable.
+        # to try to reproduce in this simplified version. Since the point of this simplified version is to learn and 
+        #demonstrate Git, not to produce a working implementation, this limitation is acceptable.
 
 def cmd_checkout(args):
     repo = gitRepo.repo_find()
@@ -113,3 +115,51 @@ def cmd_rev_parse(args):
         fmt = None
     repo = gitRepo.repo_find()
     print(gitUtil.object_find(repo, args.name, fmt, follow=True))
+
+#ls-file command displays the names of files in the staging area. This version of ls-file
+#will be much simpler and added a --verbose option that doesn't exist in git in order to 
+#display every single bit of info in the index file for testing and educational purpose.
+def cmd_ls_files(args):
+    repo = gitRepo.repo_find()
+    index = gitUtil.index_read(repo)
+    if args.verbose:
+        print("Index file format v{}, containing {} entries.".format(index.version, len(index.entries)))
+    
+    for entry in index.entries:
+        print(entry.name)
+        if args.verbose:
+            print("  {} with perms: {:o}".format(
+                { 0b1000: "regular file",
+                0b1010: "symlink",
+                0b1110: "git link" }[entry.mode_type],
+                entry.mode_perms))
+            print("  on blob: {}".format(entry.sha))
+            print("  created: {}.{}, modified: {}.{}".format(
+                datetime.fromtimestamp(entry.ctime[0])
+                , entry.ctime[1]
+                , datetime.fromtimestamp(entry.mtime[0])
+                , entry.mtime[1]))
+            print("  device: {}, inode: {}".format(entry.dev, entry.ino))
+            #print("  user: {} ({})  group: {} ({})".format(
+            #    pwd.getpwuid(entry.uid).pw_name,
+            #    entry.uid,
+            #    grp.getgrgid(entry.gid).gr_name,
+            #    entry.gid))
+            print("  flags: stage={} assume_valid={}".format(
+                entry.flag_stage,
+                entry.flag_assume_valid))
+
+#The check-ignore command takes a list of paths and output back those paths that should be ignored.
+def cmd_check_ignore(args):
+    repo = gitRepo.repo_find()
+    rules = gitUtil.gitignore_read(repo)
+    for path in args.path:
+        if gitUtil.check_ignore(rules, path):
+            print(path)
+
+#status command is more complicated than ls-file command because it needs to compare the index
+#with both HEAD and the actual filesystem. You call git status to know which files were added,
+#removed, or modified since the last commit, and which of these changes are actually staged,
+#and will make it to the next commit. So status command actually compare the HEAD with
+#the staging area, and staging area with the work tree.
+ 

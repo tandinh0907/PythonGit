@@ -115,3 +115,14 @@ argsp.add_argument("--wyag-type",
 
 argsp.add_argument("name",
                    help="The name to parse")
+
+#For ls-files command
+argsp = argsubparsers.add_parser("ls-files", help = "List all the stage files")
+argsp.add_argument("--verbose", action="store_true", help="Show everything.")
+
+#For check-ignore command
+argsp = argsubparsers.add_parser("check-ignore", help = "Check path(s) against ignore rules.")
+argsp.add_argument("path", nargs="+", help="Paths to check")
+
+#For the status command
+argsp = argsubparsers.add_parser("status", help = "Show the working tree status.")
