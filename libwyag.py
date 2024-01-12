@@ -162,4 +162,44 @@ def cmd_check_ignore(args):
 #removed, or modified since the last commit, and which of these changes are actually staged,
 #and will make it to the next commit. So status command actually compare the HEAD with
 #the staging area, and staging area with the work tree.
+
+#I'll implement status command in three part:
+#   _The active branch or "detached HEAD" 
+#   _The difference between the index and the working tree ("Changes not stage for commit")
+#   _The difference betweeen HEAD and the index ("Changes to be committed" and "Untracked files")
+
+def cmd_status(_):
+    repo = gitRepo.repo_find()
+    index = gitUtil.index_read(repo)
+
+    gitUtil.status_branch(repo)
+    gitUtil.status_head_index(repo, index)
+    print()
+    gitUtil.status_index_worktree(repo, index)
+
+#Now to commit, we need three last thing to create the actual commit:
+#   _Commands to modify the index, so our commits arent's just a copy of their parent.
+#    Those commands are 'add' and 'rm' commands.
+#   _Those commands need to write the modified index back, since we commit from the index.
+#   _And obviously, we'll need the commit function and it associated command
  
+#The 'rm' command remove an entry from an index which mean that the next commit won't include this file.
+def cmd_rm(args):
+    repo = gitRepo.repo_find()
+    gitUtil.rm(repo, args.path)
+
+#The 'add' command consist of 4 step:
+#   _Begin by removing existing index entry, if there's one, without removing the file itself (this is 
+#    why the 'rm' function has those optional arguments).
+#   _Then hash the file into a glob oject
+#   _Create its entry
+#   _Finally write the modified index back
+def cmd_add(args):
+    repo = gitRepo.repo_find()
+    gitUtil.add(repo, args.path)
+
+#After we've modified the index, so actually staged changes, the 'commit' command will turn
+#those changes into a commit. 
+
+#To do so, we first need to convert the index into a tree object, generate and store the corresponding 
+#commit object, and update the HEAD branch to the new commit

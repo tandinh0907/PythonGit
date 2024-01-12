@@ -126,3 +126,20 @@ argsp.add_argument("path", nargs="+", help="Paths to check")
 
 #For the status command
 argsp = argsubparsers.add_parser("status", help = "Show the working tree status.")
+
+#For the rm command
+argsp = argsubparsers.add_parser("rm", help="Remove files from the working tree and the index.")
+argsp.add_argument("path", nargs="+", help="Files to remove")
+
+#For the add command
+argsp = argsubparsers.add_parser("add", help = "Add files contents to the index.")
+argsp.add_argument("path", nargs="+", help="Files to add")
+
+#For the commit command
+argsp = argsubparsers.add_parser("commit", help="Record changes to the repository.")
+
+argsp.add_argument("-m",
+                   metavar="message",
+                   dest="message",
+                   help="Message to associate with this commit.")
+
