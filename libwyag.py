@@ -12,11 +12,11 @@ import sys
 import zlib
 import gitRepo
 import gitUtil
-import comParser
+import gitConfig
 
 
 def main(argv=sys.argv[1:]):
-    args = comParser.argparser.parse_args(argv)
+    args = gitConfig.argparser.parse_args(argv)
     if   args.command == "add"          : cmd_add(args)
     elif args.command == "cat-file"     : cmd_cat_file(args)
     elif args.command == "check-ignore" : cmd_check_ignore(args)
@@ -203,3 +203,26 @@ def cmd_add(args):
 
 #To do so, we first need to convert the index into a tree object, generate and store the corresponding 
 #commit object, and update the HEAD branch to the new commit
+def cmd_commit(args):
+    repo = gitRepo.repo_find()
+    index = gitUtil.index_read(repo)
+
+    #Create trees, grab back SHA for the root tree.
+    tree = gitUtil.tree_from_index(repo, index)
+
+    #Create commit object itself.
+    commit = gitUtil.commit_create(repo, tree, gitUtil.object_find(repo, "HEAD"), 
+                                   gitUtil.gitconfig_user_get(gitUtil.gitconfig_read()), 
+                                   datetime.now(), args.message)
+
+    #Update HEAD so our commit is now the tip of the active branch
+    active_branch = gitUtil.branch_get_active(repo)
+    
+    #If we're on a branch, we update refs/HEAD/branch. Otherwise, we update HEAD itself.
+    if active_branch:
+        with open(gitRepo.repo_file(repo, os.path.join("refs/heads", active_branch)), "w") as fd:
+            fd.write(commit + "\n")
+    else:
+        with open(gitRepo.repo_file(repo, "HEAD"), "w") as fd:
+            fd.write("\n")
+
